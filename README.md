@@ -1,4 +1,4 @@
-**# stackflov-docs**# StackFlov
+# **stackflov-docs**
 
 > 자취를 준비/운영하는 학생들을 위한 커뮤니티 플랫폼  
 > **자취로그(커뮤니티 게시판)** + **니방내방(지도 기반 원룸 리뷰)**
@@ -9,15 +9,12 @@
 - 📦 Frontend Repo: https://github.com/StackFlov/stackflov-frontend
 - 🧩 Backend Repo: https://github.com/StackFlov/stackflov-backend
 
----
 
 ## Highlights
 - **AWS 인프라 구성**: EC2 / RDS(MySQL) / S3 / CloudFront / Route53 / Nginx
 - **무중단 배포**: Docker-Compose 기반 Blue/Green(8081/8082) + Nginx upstream 전환
 - **인증/인가**: Spring Security + JWT + OAuth2(소셜 로그인) + Redis 토큰 관리
 - **실시간 기능**: WebSocket(STOMP) 기반 채팅(또는 알림) 구조
-
----
 
 ## Table of Contents
 - [1. 서비스 개요](#1-서비스-개요)
@@ -27,13 +24,10 @@
 - [5. 기술 스택](#5-기술-스택)
 - [6. 배포 & 운영](#6-배포--운영)
 - [7. 주요 설계 결정](#7-주요-설계-결정)
-- [8. 트러블슈팅](#8-트러블슈팅)
+- [8. 트러블슈팅 & 개선](#8-트러블슈팅--개선)
 - [9. 레포지토리](#9-레포지토리)
-- [10. 로컬 실행](#10-로컬-실행)
-- [11. 팀 구성 & 역할](#11-팀-구성--역할)
-- [12. 로드맵](#12-로드맵)
-
----
+- [10. 팀 구성 & 역할](#10-팀-구성--역할)
+- [11. 회고 & 로드맵](#11-회고--로드맵)
 
 ## 1. 서비스 개요
 ### 왜 만들었나
@@ -43,8 +37,6 @@ StackFlov는 **“생활 정보 공유 + 지도 기반 리뷰 탐색”**을 한
 ### 무엇을 제공하나
 - **자취로그**: 생활 정보/팁/질문을 빠르게 공유하는 커뮤니티
 - **니방내방**: 지도 기반으로 원룸 리뷰를 조건 필터로 탐색/비교
-
----
 
 ## 2. 핵심 기능
 ### 🧾 자취로그 (Community)
@@ -65,15 +57,11 @@ StackFlov는 **“생활 정보 공유 + 지도 기반 리뷰 탐색”**을 한
 ### 💬 실시간
 - WebSocket(STOMP) 기반 채팅/알림
 
----
-
 ## 3. 데모 / 링크
 - Demo Video: TODO (선택)
 - Screenshots: `docs/screenshots/` 참고
 
----
-
-## 4. 시스템 아키텍처 (System Architecture)
+## 4. 시스템 아키텍처
 
 ### 4.1 전체 구성도
 > 아래 이미지 파일을 `docs/architecture.png`로 넣고 경로만 맞추면 됩니다.
@@ -86,9 +74,7 @@ StackFlov는 **“생활 정보 공유 + 지도 기반 리뷰 탐색”**을 한
 4. 백엔드는 RDS(MySQL), Redis, S3와 연동
 5. Nginx는 헬스체크 결과를 기준으로 Blue(8081)/Green(8082) 중 정상 인스턴스로 트래픽을 전환
 
----
-
-## 5. 기술 스택 (Tech Stack)
+## 5. 기술 스택
 
 ### Frontend
 - React 19
@@ -112,9 +98,7 @@ StackFlov는 **“생활 정보 공유 + 지도 기반 리뷰 탐색”**을 한
 - Docker / Docker-Compose
 - GitHub Actions (CI/CD)
 
----
-
-## 6. 배포 & 운영 포인트 (Deployment & Ops Highlights)
+## 6. 배포 & 운영
 - GitHub Actions로 **빌드 → 도커 이미지 생성/푸시 → EC2 배포**까지 자동화했습니다.
 - `push` 이벤트는 모든 브랜치에서 동작하며, **Docker 이미지가 커밋 SHA 태그로 빌드/푸시**됩니다.
 - `master` 브랜치에 push 된 경우에만 추가로 `latest` 태그를 생성하고, **배포 Job이 실행**됩니다.
@@ -137,9 +121,7 @@ StackFlov는 **“생활 정보 공유 + 지도 기반 리뷰 탐색”**을 한
    - Docker-Compose 기반으로 컨테이너 재기동 및 Blue/Green 전환 로직을 스크립트로 관리
 4. Redis는 `redis:alpine` 이미지를 함께 pull하여 운영 환경을 구성
 
----
-
-## 7. 주요 설계 결정 (Key Design Decisions)
+## 7. 주요 설계 결정
 
 ### 7.1 인증/인가 구조
 - **Spring Security 기반 인증/인가**를 적용하여 인증 로직과 비즈니스 로직을 분리했습니다.
@@ -161,9 +143,7 @@ StackFlov는 **“생활 정보 공유 + 지도 기반 리뷰 탐색”**을 한
 - 이미지 파일은 서버 로컬에 저장하지 않고 **AWS S3에 업로드**하도록 구현했습니다.
 - 업로드된 이미지의 접근 정보(예: URL 또는 Key)를 서비스 데이터와 함께 관리합니다.
 
----
-
-## 8. 트러블슈팅 & 개선 사례 (Troubleshooting)
+## 8. 트러블슈팅 & 개선
 
 > 아래 형식으로 3~5개만 “진짜 겪은 것”을 적으면 포트폴리오 임팩트가 확 올라갑니다.
 
@@ -191,40 +171,31 @@ StackFlov는 **“생활 정보 공유 + 지도 기반 리뷰 탐색”**을 한
   - Nginx upstream 전환 및 reload가 예측 가능하게 동작하도록 배포 절차를 고정했습니다.
 - **배운 점**: 무중단 배포에서 핵심은 “컨테이너가 켜짐”이 아니라 **헬스체크로 ‘Ready’를 확인하고 전환하는 운영 절차**를 만드는 것입니다.
 
----
+## 9. 레포지토리
+- Frontend: [<FE_REPO_URL>](https://github.com/StackFlov/stackflov-frontend)
+  - React(React Router v6, styled-components/Emotion), STOMP/SockJS, 배포(S3+CloudFront) 구현 상세
+  - 주요 화면 및 컴포넌트 구조, API 연동(axios), 쿠키 관리 방식 정리
+- Backend: [<BE_REPO_URL>](https://github.com/StackFlov/stackflov-backend)
+  - Spring Boot(Java 21) 기반 API, 인증/인가(JWT+OAuth2), Redis, WebSocket(STOMP) 구현 상세
+  - Docker-Compose + Nginx 기반 **Blue/Green(8081/8082)** 운영 및 GitHub Actions CI/CD 배포 파이프라인 정리
 
-## 9. 레포지토리 안내 (Repositories)
-- Frontend: <FE_REPO_URL>
-  - 화면/컴포넌트 구조, 빌드/배포 상세
-- Backend: <BE_REPO_URL>
-  - 도메인/보안/API/배포 파이프라인 상세
+## 10. 팀 구성 & 역할
 
----
+- **팀 구성**: 3명 (Backend 1, Frontend 1, 기획/문서 1)
 
-## 10. 로컬 실행 / 개발 환경 (Getting Started)
+- **담당 역할 (Backend & Infra/DevOps)**
+  - Spring Boot(Java 21) 기반 **REST API 설계 및 구현**
+  - **인증/인가**: Spring Security 기반 JWT + OAuth2(소셜 로그인) 연동
+  - **Redis 연동**: 인증 관련 데이터/상태 관리
+  - **실시간 기능**: WebSocket(STOMP) 기반 채팅 기능 구현(프론트와 연동)
+  - **AWS 인프라 구축/운영**: EC2, RDS(MySQL), S3, CloudFront, Route53 구성
+  - **무중단 배포 체계 구축**: Docker-Compose 기반 **Blue/Green(8081/8082)** + Nginx Reverse Proxy 운영
+  - **CI/CD 자동화**: GitHub Actions → Docker Hub 이미지 빌드/푸시 → EC2 배포 스크립트(`deploy.sh`) 실행
+  - **운영 트러블슈팅 및 개선**: SSL/Nginx 설정, 배포 전환, 인증 흐름 등 운영 이슈 해결 및 문서화
 
-### Quick Start
-> 자세한 내용은 각 레포 README를 참고하세요.
-- Frontend: <FE_REPO_URL>
-- Backend: <BE_REPO_URL>
-
-(선택) 로컬에서 전체를 띄우는 docker-compose가 따로 있으면 여기에 추가
-
----
-
-## 11. 팀 구성 & 역할 (Team & Role)
-- 인원: 3명 (Backend 1, Frontend 1, 기획/문서 1)
-- 내 역할(Backend 리드):
-  - 백엔드 API 설계/구현
-  - 인증/인가(JWT/OAuth2), Redis, WebSocket
-  - AWS 인프라 구성 및 배포 자동화(Blue/Green, Nginx, GitHub Actions)
-  - 운영 이슈 트러블슈팅 및 개선
-
----
-
-## 12. 회고 & 로드맵 (Retrospective / Roadmap)
-- 개선 예정:
-  - 성능 최적화(쿼리/인덱스)
-  - 모니터링/알림(CloudWatch, APM 등)
-  - 테스트/품질(통합테스트, 부하테스트)
-  - 보안 강화(레이트리밋, WAF 등)
+## 11. 회고 & 로드맵
+- 운영 환경에서 인증/배포/프록시 설정처럼 “코드 외 영역”이 서비스 안정성에 큰 영향을 준다는 것을 체감했습니다.
+- Blue/Green 배포를 구성하며 헬스체크 기반 전환 흐름을 정리해 배포 안정성을 높였습니다.
+- `app`/`api`처럼 도메인을 분리한 구조에서 CORS/쿠키/인증 헤더 등 **브라우저 정책**이 실제 사용자 경험과 장애에 직결된다는 것을 배웠습니다.
+- GitHub Actions로 빌드→이미지 푸시→EC2 배포까지 자동화하면서 배포 과정을 스크립트로 표준화하면 실수/재현성 문제가 크게 줄어든다는 것을 느꼈습니다.
+- 이미지 업로드(S3), 실시간 통신(STOMP) 같은 기능은 “구현”뿐 아니라 운영 환경(권한/네트워크/HTTPS)까지 포함해 끝까지 검증해야 한다는 점을 체감했습니다.
