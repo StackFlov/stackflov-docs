@@ -64,7 +64,6 @@ StackFlov는 **“생활 정보 공유 + 지도 기반 리뷰 탐색”**을 한
 ## 4. 시스템 아키텍처
 
 ### 4.1 전체 구성도
-> 아래 이미지 파일을 `docs/architecture.png`로 넣고 경로만 맞추면 됩니다.
 ![architecture](docs/architecture.png)
 
 ### 4.2 요청 흐름(예시)
@@ -73,6 +72,15 @@ StackFlov는 **“생활 정보 공유 + 지도 기반 리뷰 탐색”**을 한
 3. Route53 → EC2(Nginx) → Blue/Green 백엔드 컨테이너(8081/8082)로 라우팅
 4. 백엔드는 RDS(MySQL), Redis, S3와 연동
 5. Nginx는 헬스체크 결과를 기준으로 Blue(8081)/Green(8082) 중 정상 인스턴스로 트래픽을 전환
+
+## 4.3 Database Schema (ERD)
+프로젝트의 핵심 도메인인 커뮤니티(자취로그)와 지도 기반 리뷰(니방내방)를 중심으로 설계된 데이터 구조입니다.
+![ERD](docs/erd.png)
+
+- **User**: Spring Security 및 OAuth2 연동을 위한 사용자 정보 관리
+- **Community**: 게시글, 댓글, 좋아요 간의 1:N 관계 구성
+- **Review/Map**: 지도 좌표 기반의 리뷰 데이터 및 S3 이미지 경로 관리
+- **Auth**: Redis를 활용한 Refresh Token 및 인증 상태 관리
 
 ## 5. 기술 스택
 
@@ -100,10 +108,23 @@ StackFlov는 **“생활 정보 공유 + 지도 기반 리뷰 탐색”**을 한
 - Terraform (Infrastructure as Code)
 
 ## 6. 배포 & 운영
-- GitHub Actions로 **빌드 → 도커 이미지 생성/푸시 → EC2 배포**까지 자동화했습니다.
-- `push` 이벤트는 모든 브랜치에서 동작하며, **Docker 이미지가 커밋 SHA 태그로 빌드/푸시**됩니다.
-- `master` 브랜치에 push 된 경우에만 추가로 `latest` 태그를 생성하고, **배포 Job이 실행**됩니다.
-- 수동 배포를 위해 `workflow_dispatch`도 지원합니다.
+### 6.1 인프라 프로비저닝 (Infra)
+- **Terraform(IaC)**을 도입하여 VPC, EC2, RDS, S3, CloudFront, Route 53 등 모든 AWS 리소스를 코드로 정의했습니다.
+- 인프라 변경 이력을 Git으로 관리하며, **재현성(Reproducibility)**을 확보하여 동일한 환경을 수 분 내에 재구축할 수 있도록 설계했습니다.
+- CloudFront와 S3 연동 시 **OAC(Origin Access Control)**를 적용하여 보안성을 강화했습니다.
+
+### 6.2 CI/CD 파이프라인 (App)
+GitHub Actions를 활용하여 **빌드 → 도커 이미지 생성/푸시 → EC2 배포** 프로세스를 자동화했습니다.
+
+**CI (Build & Push)**
+- **브랜치 전략**: 모든 브랜치에서 `push` 시 Docker 이미지가 커밋 SHA 태그(`sha-<commit_sha>`)로 빌드 및 푸시됩니다.
+- **Master 브랜치**: `master` 브랜치에 푸시될 경우에만 추가로 `latest` 태그를 생성하고 배포 Job을 트리거합니다.
+- **수동 배포**: `workflow_dispatch`를 지원하여 필요 시 특정 시점에 수동 배포가 가능합니다.
+
+**CD (Deploy to EC2)**
+1. **인증 및 접속**: `appleboy/ssh-action`을 사용하여 EC2에 보안 접속 후 Docker Hub에서 최신 이미지를 Pull 합니다.
+2. **무중단 배포**: EC2 내 `deploy.sh` 스크립트를 통해 **Blue/Green(8081/8082)** 전환 로직을 수행합니다.
+3. **환경 구성**: Redis(`redis:alpine`)를 포함한 다중 컨테이너 환경을 `docker-compose`로 일관되게 관리합니다.
 
 **CI (Build & Push)**
 1. Repository Checkout
