@@ -75,7 +75,7 @@ StackFlov는 **“생활 정보 공유 + 지도 기반 리뷰 탐색”**을 한
 
 ## 4.3 Database Schema (ERD)
 프로젝트의 핵심 도메인인 커뮤니티(자취로그)와 지도 기반 리뷰(니방내방)를 중심으로 설계된 데이터 구조입니다.
-![ERD](docs/erd.png)
+![ERD](docs/stackflov_erd.png)
 
 - **User**: Spring Security 및 OAuth2 연동을 위한 사용자 정보 관리
 - **Community**: 게시글, 댓글, 좋아요 간의 1:N 관계 구성
