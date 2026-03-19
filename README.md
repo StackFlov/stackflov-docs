@@ -63,9 +63,13 @@ StackFlov는 **“생활 정보 공유 + 지도 기반 리뷰 탐색”**을 한
 - Screenshots: `docs/screenshots/` 참고
 
 ## 4. API 명세 및 문서화
-Swagger UI (SpringDoc) 활용
-협업 최적화: 모든 API에 대해 한국어 설명을 추가하고 성공/실패 응답(DTO) 및 에러 코드를 상세히 기술하여 프론트엔드와의 협업 생산성을 높였습니다.
-실시간 테스트: 운영 서버(api.stackflov.com)에 직접 연결된 Swagger 환경을 구축하여 별도의 툴 없이도 즉각적인 API 테스트가 가능하도록 구성했습니다.
+
+### Swagger UI (SpringDoc) 활용
+- 협업 최적화: 모든 API에 대해 한국어 설명을 추가하고 성공/실패 응답(DTO) 및 에러 코드를 상세히 기술하여 프론트엔드와의 협업 생산성을 높였습니다.
+- 실시간 테스트: 운영 서버(api.stackflov.com)에 직접 연결된 Swagger 환경을 구축하여 별도의 툴 없이도 즉각적인 API 테스트가 가능하도록 구성했습니다.
+
+### API 전체 리스트 (Scroll View)
+![cap](docs/screenshots/cap.gif)
 
 🎥 API 전체 리스트 (Scroll View)
 
