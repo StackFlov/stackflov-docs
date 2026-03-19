@@ -20,14 +20,15 @@
 - [1. 서비스 개요](#1-서비스-개요)
 - [2. 핵심 기능](#2-핵심-기능)
 - [3. 데모 / 링크](#3-데모--링크)
-- [4. 시스템 아키텍처](#4-시스템-아키텍처)
-- [5. 기술 스택](#5-기술-스택)
-- [6. 배포 & 운영](#6-배포--운영)
-- [7. 주요 설계 결정](#7-주요-설계-결정)
-- [8. 트러블슈팅 & 개선](#8-트러블슈팅--개선)
-- [9. 레포지토리](#9-레포지토리)
-- [10. 팀 구성 & 역할](#10-팀-구성--역할)
-- [11. 회고 & 로드맵](#11-회고--로드맵)
+- [4. API 명세 및 문서화](#4-AP-명세-및-문서화)
+- [5. 시스템 아키텍처](#5-시스템-아키텍처)
+- [6. 기술 스택](#6-기술-스택)
+- [7. 배포 & 운영](#7-배포--운영)
+- [8. 주요 설계 결정](#8-주요-설계-결정)
+- [9. 트러블슈팅 & 개선](#9-트러블슈팅--개선)
+- [10. 레포지토리](#10-레포지토리)
+- [11. 팀 구성 & 역할](#11-팀-구성--역할)
+- [12. 회고 & 로드맵](#12-회고--로드맵)
 
 ## 1. 서비스 개요
 ### 왜 만들었나
@@ -61,19 +62,26 @@ StackFlov는 **“생활 정보 공유 + 지도 기반 리뷰 탐색”**을 한
 - Demo Video: TODO (선택)
 - Screenshots: `docs/screenshots/` 참고
 
-## 4. 시스템 아키텍처
+## 4. API 명세 및 문서화
+Swagger UI (SpringDoc) 활용
+협업 최적화: 모든 API에 대해 한국어 설명을 추가하고 성공/실패 응답(DTO) 및 에러 코드를 상세히 기술하여 프론트엔드와의 협업 생산성을 높였습니다.
+실시간 테스트: 운영 서버(api.stackflov.com)에 직접 연결된 Swagger 환경을 구축하여 별도의 툴 없이도 즉각적인 API 테스트가 가능하도록 구성했습니다.
 
-### 4.1 전체 구성도
+🎥 API 전체 리스트 (Scroll View)
+
+## 5. 시스템 아키텍처
+
+### 5.1 전체 구성도
 ![architecture](docs/architecture.png)
 
-### 4.2 요청 흐름(예시)
+### 5.2 요청 흐름(예시)
 1. 사용자가 `app.stackflov.com` 접속 → CloudFront가 정적 리소스 제공(S3)
 2. 프론트가 `api.stackflov.com`으로 API 요청
 3. Route53 → EC2(Nginx) → Blue/Green 백엔드 컨테이너(8081/8082)로 라우팅
 4. 백엔드는 RDS(MySQL), Redis, S3와 연동
 5. Nginx는 헬스체크 결과를 기준으로 Blue(8081)/Green(8082) 중 정상 인스턴스로 트래픽을 전환
 
-## 4.3 Database Schema (ERD)
+## 5.3 Database Schema (ERD)
 프로젝트의 핵심 도메인인 커뮤니티(자취로그)와 지도 기반 리뷰(니방내방)를 중심으로 설계된 데이터 구조입니다.
 ![ERD](docs/stackflov_erd.png)
 
@@ -82,7 +90,7 @@ StackFlov는 **“생활 정보 공유 + 지도 기반 리뷰 탐색”**을 한
 - **Review/Map**: 지도 좌표 기반의 리뷰 데이터 및 S3 이미지 경로 관리
 - **Auth**: Redis를 활용한 Refresh Token 및 인증 상태 관리
 
-## 5. 기술 스택
+## 6. 기술 스택
 
 ### Frontend
 - React 19
@@ -107,24 +115,14 @@ StackFlov는 **“생활 정보 공유 + 지도 기반 리뷰 탐색”**을 한
 - GitHub Actions (CI/CD)
 - Terraform (Infrastructure as Code)
 
-## 6. 배포 & 운영
-### 6.1 인프라 프로비저닝 (Infra)
+## 7. 배포 & 운영
+### 7.1 인프라 프로비저닝 (Infra)
 - **Terraform(IaC)**을 도입하여 VPC, EC2, RDS, S3, CloudFront, Route 53 등 모든 AWS 리소스를 코드로 정의했습니다.
 - 인프라 변경 이력을 Git으로 관리하며, **재현성(Reproducibility)**을 확보하여 동일한 환경을 수 분 내에 재구축할 수 있도록 설계했습니다.
 - CloudFront와 S3 연동 시 **OAC(Origin Access Control)**를 적용하여 보안성을 강화했습니다.
 
-### 6.2 CI/CD 파이프라인 (App)
+### 7.2 CI/CD 파이프라인 (App)
 GitHub Actions를 활용하여 **빌드 → 도커 이미지 생성/푸시 → EC2 배포** 프로세스를 자동화했습니다.
-
-**CI (Build & Push)**
-- **브랜치 전략**: 모든 브랜치에서 `push` 시 Docker 이미지가 커밋 SHA 태그(`sha-<commit_sha>`)로 빌드 및 푸시됩니다.
-- **Master 브랜치**: `master` 브랜치에 푸시될 경우에만 추가로 `latest` 태그를 생성하고 배포 Job을 트리거합니다.
-- **수동 배포**: `workflow_dispatch`를 지원하여 필요 시 특정 시점에 수동 배포가 가능합니다.
-
-**CD (Deploy to EC2)**
-1. **인증 및 접속**: `appleboy/ssh-action`을 사용하여 EC2에 보안 접속 후 Docker Hub에서 최신 이미지를 Pull 합니다.
-2. **무중단 배포**: EC2 내 `deploy.sh` 스크립트를 통해 **Blue/Green(8081/8082)** 전환 로직을 수행합니다.
-3. **환경 구성**: Redis(`redis:alpine`)를 포함한 다중 컨테이너 환경을 `docker-compose`로 일관되게 관리합니다.
 
 **CI (Build & Push)**
 1. Repository Checkout
@@ -134,6 +132,7 @@ GitHub Actions를 활용하여 **빌드 → 도커 이미지 생성/푸시 → E
 5. Docker 이미지 빌드 및 푸시
    - 기본 태그: `sha-<commit_sha>`
    - `master` 브랜치일 때: `latest` 태그도 함께 푸시
+- **수동 배포**: `workflow_dispatch`를 지원하여 필요 시 특정 시점에 수동 배포가 가능합니다.
 
 **CD (Deploy to EC2, master only)**
 1. GitHub Actions에서 EC2로 SSH 접속(appleboy/ssh-action)
@@ -143,30 +142,30 @@ GitHub Actions를 활용하여 **빌드 → 도커 이미지 생성/푸시 → E
    - Docker-Compose 기반으로 컨테이너 재기동 및 Blue/Green 전환 로직을 스크립트로 관리
 4. Redis는 `redis:alpine` 이미지를 함께 pull하여 운영 환경을 구성
 
-## 7. 주요 설계 결정
+## 8. 주요 설계 결정
 
-### 7.1 인증/인가 구조
+### 8.1 인증/인가 구조
 - **Spring Security 기반 인증/인가**를 적용하여 인증 로직과 비즈니스 로직을 분리했습니다.
 - **JWT 기반 인증**으로 API 요청을 처리합니다.
 - **OAuth2 소셜 로그인(예: Google / Kakao / Naver)**을 통해 로그인/회원가입을 통합했습니다.
 - **권한별 접근 제어**(예: 비로그인 제한, 사용자 권한 기반 접근)를 적용했습니다.
 
-### 7.2 Redis 사용 목적
+### 8.2 Redis 사용 목적
 - 인증 과정에서 필요한 **토큰/인증 상태 데이터 저장소**로 Redis를 사용했습니다.
 - DB 부하를 줄이고 빠른 검증/만료 처리가 가능하도록 구성했습니다.
   - (구체적으로 저장한 키/값 구조 및 만료 전략은 Backend Repo에 상세 정리)
 
-### 7.3 실시간(WebSocket/STOMP)
+### 8.3 실시간(WebSocket/STOMP)
 - **WebSocket + STOMP**로 실시간 기능(채팅)을 구현했습니다.
 - 프론트는 `@stomp/stompjs` + `sockjs-client`로 연결합니다.
 - 메시징은 **Pub/Sub 구조**로 구성했습니다. (예: `/pub`, `/sub`)
 
-### 7.4 이미지 업로드(S3)
+### 8.4 이미지 업로드(S3)
 - 이미지 파일은 서버 로컬에 저장하지 않고 **AWS S3에 업로드**하도록 구현했습니다.
 - 업로드된 이미지의 접근 정보(예: URL 또는 Key)를 서비스 데이터와 함께 관리합니다.]
 - CloudFront와 S3 연동 시 **OAC(Origin Access Control)**를 적용하여 S3 버킷을 퍼블릭에 개방하지 않고 CDN을 통해서만 안전하게 접근하도록 설계함.
 
-## 8. 트러블슈팅 & 개선
+## 9. 트러블슈팅 & 개선
 
 ### 사례 1) Nginx SSL 설정/인증서(ACM 등) 적용 후 HTTPS 접속 문제
 - **문제**: 도메인에 HTTPS를 적용하는 과정에서 인증서 적용/리다이렉트/프록시 설정이 꼬이면서 정상 접속이 안 되거나 예상치 못한 동작(리다이렉트/접속 실패)이 발생했습니다.
@@ -192,7 +191,7 @@ GitHub Actions를 활용하여 **빌드 → 도커 이미지 생성/푸시 → E
   - Nginx upstream 전환 및 reload가 예측 가능하게 동작하도록 배포 절차를 고정했습니다.
 - **배운 점**: 무중단 배포에서 핵심은 “컨테이너가 켜짐”이 아니라 **헬스체크로 ‘Ready’를 확인하고 전환하는 운영 절차**를 만드는 것입니다.
 
-## 9. 레포지토리
+## 10. 레포지토리
 - Frontend: [<FE_REPO_URL>](https://github.com/StackFlov/stackflov-frontend)
   - React(React Router v6, styled-components/Emotion), STOMP/SockJS, 배포(S3+CloudFront) 구현 상세
   - 주요 화면 및 컴포넌트 구조, API 연동(axios), 쿠키 관리 방식 정리
@@ -200,7 +199,7 @@ GitHub Actions를 활용하여 **빌드 → 도커 이미지 생성/푸시 → E
   - Spring Boot(Java 21) 기반 API, 인증/인가(JWT+OAuth2), Redis, WebSocket(STOMP) 구현 상세
   - Docker-Compose + Nginx 기반 **Blue/Green(8081/8082)** 운영 및 GitHub Actions CI/CD 배포 파이프라인 정리
 
-## 10. 팀 구성 & 역할
+## 11. 팀 구성 & 역할
 
 - **팀 구성**: 3명 (Backend 1, Frontend 1, 기획/문서 1)
 
@@ -214,7 +213,7 @@ GitHub Actions를 활용하여 **빌드 → 도커 이미지 생성/푸시 → E
   - **CI/CD 자동화**: GitHub Actions → Docker Hub 이미지 빌드/푸시 → EC2 배포 스크립트(`deploy.sh`) 실행
   - **운영 트러블슈팅 및 개선**: SSL/Nginx 설정, 배포 전환, 인증 흐름 등 운영 이슈 해결 및 문서화
 
-## 11. 회고 & 로드맵
+## 12. 회고 & 로드맵
 - 운영 환경에서 인증/배포/프록시 설정처럼 “코드 외 영역”이 서비스 안정성에 큰 영향을 준다는 것을 체감했습니다.
 - Blue/Green 배포를 구성하며 헬스체크 기반 전환 흐름을 정리해 배포 안정성을 높였습니다.
 - `app`/`api`처럼 도메인을 분리한 구조에서 CORS/쿠키/인증 헤더 등 **브라우저 정책**이 실제 사용자 경험과 장애에 직결된다는 것을 배웠습니다.
